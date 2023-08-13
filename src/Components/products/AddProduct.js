@@ -43,7 +43,7 @@ export default function AddProduct() {
         //   error: response.data.error,
         // }
       }
-      if(response.status===201){
+      if(response.data.status===201){
         Swal.fire({
           icon:"success",
           text:response.data.message
