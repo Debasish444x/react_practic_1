@@ -14,7 +14,7 @@ export default function EditProduct() {
 
   const [name, setName] = useState("")
   const [price, setPrice] = useState("")
-  const [validationError,setValidationError] = useState({})
+  const [validationError,setValidationError] = useState({ error: '', msg: '' })
 
   useEffect(()=>{
     fetchProduct()
@@ -63,21 +63,46 @@ export default function EditProduct() {
     formData.append('name', name)
     formData.append('price', price)
 
-    await axios.post(`http://localhost:8000/api/products/${id}`, formData).then(({data})=>{
-      Swal.fire({
-        icon:"success",
-        text:data.message
-      })
-      navigate("/")
-    }).catch(({response})=>{
-      if(response.status===422){
-        setValidationError(response.data.errors)
-      }else{
+    // 
+    const token = localStorage.getItem("token");
+    axios
+    .request({
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      method: "POST",
+      url: `http://localhost/newApp/api/updateProduct/${id}`,
+      data: formData,
+    })
+    .then((response) => {
+      console.log(response.data);
+      if(response.data.status===422){
+        console.log("422 error")
+        setValidationError({error:response.data.error,
+            price:response.data.response.price
+        })
+      
+      }
+      if(response.data.status===201){
+        Swal.fire({
+          icon:"success",
+          text:response.data.message
+        })
+        navigate("/dashboard")
+      }
+      else{
         Swal.fire({
           text:response.data.message,
           icon:"error"
         })
       }
+    }).catch(({response})=>{
+      console.log(response);
+        Swal.fire({
+          text:response.data.message,
+          icon:"error"
+        })
+      
     })
   }
 
